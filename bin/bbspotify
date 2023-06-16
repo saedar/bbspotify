@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/bbspotify.rb'
+
+# Initialize a new instance of the utility.
+#
+# ARGV[0] - The source file with existing configuration.
+# ARGV[1] - The file containing the requested changes.
+bbspotify = BBSpotify.new(File.read(ARGV[0]), File.read(ARGV[1]))
+
+# Execute task.
+bbspotify.process

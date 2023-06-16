@@ -2,14 +2,14 @@ require 'json'
 
 class BBSpotify
 
-  # Add doc
+  # Initialize execution.
   def initialize(source, changes)
-    @source = JSON.parse(source) # Maybe I update this to just be the output var and not have a separate one.
+    @source = JSON.parse(source)
     @changes = JSON.parse(changes)
     @output = @source
   end
 
-  # Add doc
+  # Orchestration function to handle operations.
   def process
     @changes.keys.each do |k|
       case k
@@ -22,10 +22,12 @@ class BBSpotify
       end
     end
 
-    puts @output['playlists'] # Update to output a file.
+    File.write('./output.json', @output.to_json)
   end
 
-  # Add doc
+  # Create new playlist.
+  #
+  # playlists - collection of playlist changes.
   def new_playlist(playlists)
     playlists.each do |p|
       next if p['owner_id'].nil?
@@ -33,7 +35,7 @@ class BBSpotify
 
       next if @source['users'].find { |u| u['id'] == p['owner_id'] }.nil?
 
-      playlist = { 'id' => @source['playlists'].last['id'].to_i + 1, 'owner_id' => p['owner_id'], 'song_ids' => [] } # Need a better id pattern to handle deletes.
+      playlist = { 'id' => (@source['playlists'].last['id'].to_i + 1).to_s, 'owner_id' => p['owner_id'], 'song_ids' => [] } # Need a better id pattern to handle deletes.
 
       p['song_ids'].each do |s|
         playlist['song_ids'].push(s) unless @source['songs'].find { |song| song['id'] == s }.nil?
@@ -43,7 +45,9 @@ class BBSpotify
     end
   end
 
-  # Add doc
+  # Add songs to a playlist.
+  #
+  # songs - collection of song changes.
   def add_song(songs)
     songs.each do |s|
       next if s['song_id'].nil?
@@ -61,7 +65,9 @@ class BBSpotify
     end
   end
 
-  # Add doc
+  # Delete a playlist.
+  #
+  # ids - collection of playlist ids to be deleted.
   def remove_playlist(ids)
     ids.each do |id|
       @output["playlists"].delete_if { |p| p['id'] == id }  
